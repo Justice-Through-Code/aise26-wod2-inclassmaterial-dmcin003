@@ -49,7 +49,6 @@ def create_user():
     conn.close()
     
     # Security Issue: Logging sensitive information
-    print(f"Created user: {username} with password: {password}")
     return jsonify({"message": "User created", "username": username})
 
 @app.route('/login', methods=['POST'])
@@ -62,7 +61,6 @@ def login():
     
     conn = get_db_connection()
     # Security Issue: SQL injection vulnerability
-    query = f"SELECT * FROM users WHERE username='{username}' AND password='{hashed_password}'"
     user = conn.execute(
             "SELECT * FROM users WHERE username = ? AND password = ?",
             (username, hashed_password),

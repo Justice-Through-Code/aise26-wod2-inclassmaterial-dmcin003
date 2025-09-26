@@ -29,9 +29,12 @@ repos:
       - id: bandit
         args: ["-q", "-ll", "-x", "tests"]
 
-  # JSON/YAML prettify
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.13.0
+  # JSON formatting (correct repo)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0  # or the latest
     hooks:
       - id: pretty-format-json
         args: ["--autofix", "--no-sort-keys", "--indent", "2"]
+        # optional: if you have notebooks, keep the hook off them
+        exclude: '\.ipynb$'
+

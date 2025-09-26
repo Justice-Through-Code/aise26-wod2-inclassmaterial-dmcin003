@@ -2,9 +2,9 @@
 name: pre-commit
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
   pull_request:
-    branches: [ "**" ]
+    branches: ["**"]
 
 jobs:
   run:
@@ -29,8 +29,7 @@ jobs:
           key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Install pre-commit
-        run: pip install pre-commit
+        run: pip install pre-commit detect-secrets
 
       - name: Run pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
-

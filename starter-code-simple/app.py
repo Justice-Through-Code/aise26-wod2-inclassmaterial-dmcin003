@@ -2,14 +2,19 @@
 # This code has intentional security flaws for educational purposes
 
 from flask import Flask, request, jsonify
+from dotenv import load_dotenv
 import sqlite3
-import hashlib
+import bcrypt
+import os
+
+load_dotenv() # take environment variables from .env.
+
 
 app = Flask(__name__)
 
 # Security Issue: Hardcoded secrets
-DATABASE_URL = "postgresql://admin:password123@localhost/prod"
-API_SECRET = "sk-live-1234567890abcdef"
+DATABASE_URL = os.getenv("DATABASE_URL")
+API_SECRET = os.getenv("API_SECRET")
 
 def get_db_connection():
     return sqlite3.connect('users.db')
@@ -32,12 +37,13 @@ def create_user():
     password = data.get('password')
     
     # Security Issue: Weak password hashing
-    hashed_password = hashlib.md5(password.encode()).hexdigest()
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
     
     conn = get_db_connection()
     # Security Issue: SQL injection vulnerability
     conn.execute(
-        f"INSERT INTO users (username, password) VALUES ('{username}', '{hashed_password}')"
+                "INSERT INTO users (username, password) VALUES (?, ?)",
+                (username, hashed_password),
     )
     conn.commit()
     conn.close()
@@ -52,12 +58,15 @@ def login():
     username = data.get('username')
     password = data.get('password')
     
-    hashed_password = hashlib.md5(password.encode()).hexdigest()
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
     
     conn = get_db_connection()
     # Security Issue: SQL injection vulnerability
     query = f"SELECT * FROM users WHERE username='{username}' AND password='{hashed_password}'"
-    user = conn.execute(query).fetchone()
+    user = conn.execute(
+            "SELECT * FROM users WHERE username = ? AND password = ?",
+            (username, hashed_password),
+        ).fetchone()
     conn.close()
     
     if user:
@@ -78,4 +87,4 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    app.run()
